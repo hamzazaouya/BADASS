@@ -1,27 +1,67 @@
-Router 1:
+# Router 1 Configuration
+# Create a bridge interface named br0
 ip link add br0 type bridge
+
+# Bring up the bridge interface
 ip link set dev br0 up
+
+# Assign an IP address to eth0 (WAN-facing interface)
 ip addr add 10.1.1.1/24 dev eth0
+
+# Create a VXLAN interface (ID 10) on eth0 with a remote peer at 10.1.1.2
 ip link add name vxlan10 type vxlan id 10 dev eth0 remote 10.1.1.2 local 10.1.1.1 dstport 4789
+
+# Assign an IP address to the VXLAN interface
 ip addr add 20.1.1.1/24 dev vxlan10
+
+# Add eth1 (LAN-facing) to the bridge
 brctl addif br0 eth1
+
+# Add the VXLAN interface to the bridge
 brctl addif br0 vxlan10
+
+# Bring up the VXLAN interface
 ip link set dev vxlan10 up
+
+# Display VXLAN interface details
 ip -d link show vxlan10
 
-Router 2:
+
+# Router 2 Configuration
+# Create a bridge interface named br0
 ip link add br0 type bridge
+
+# Bring up the bridge interface
 ip link set dev br0 up
+
+# Assign an IP address to eth0 (WAN-facing interface)
 ip addr add 10.1.1.2/24 dev eth0
+
+# Create a VXLAN interface (ID 10) on eth0 with a remote peer at 10.1.1.1
 ip link add name vxlan10 type vxlan id 10 dev eth0 remote 10.1.1.1 local 10.1.1.2 dstport 4789
+
+# Assign an IP address to the VXLAN interface
 ip addr add 20.1.1.2/24 dev vxlan10
+
+# Bring up the VXLAN interface
 ip link set dev vxlan10 up
+
+# Display VXLAN interface details
 ip -d link show vxlan10
+
+# Add eth1 (LAN-facing) to the bridge
 brctl addif br0 eth1
+
+# Add the VXLAN interface to the bridge
 brctl addif br0 vxlan10
 
-Host 1:
+
+# Host 1 Configuration
+# Assign an IP address to eth1 (LAN-facing interface)
 ip addr add 30.1.1.1/24 dev eth1
 
-Host 2:
+
+# Host 2 Configuration
+# Assign an IP address to eth1 (LAN-facing interface)
 ip addr add 30.1.1.2/24 dev eth1
+

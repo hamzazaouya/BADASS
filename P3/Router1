@@ -1,0 +1,75 @@
+# Enter the FRRouting (FRR) shell
+vtysh
+
+# Enter configuration mode
+conf t
+
+# Set the hostname of the router
+hostname router_ael-hiou-1
+
+# Disable IPv6 forwarding
+no ipv6 forwarding
+
+
+# Configure Ethernet interfaces with IP addresses
+
+# eth0 interface (connected to another router or network)
+interface eth0
+ip address 10.1.1.1/30
+
+# eth1 interface
+interface eth1
+ip address 10.1.1.5/30
+
+# eth2 interface
+interface eth2
+ip address 10.1.1.9/30
+
+# Loopback interface for router identification and iBGP peering
+interface lo
+ip address 1.1.1.1/32
+
+
+# Configure BGP (Border Gateway Protocol)
+
+# Set the BGP Autonomous System (AS) number to 1
+router bgp 1
+
+# Create a peer group for iBGP (internal BGP)
+neighbor ibgp peer-group
+
+# Define the remote AS for the peer group (iBGP, so same AS)
+neighbor ibgp remote-as 1
+
+# Use the loopback interface as the update source for iBGP
+neighbor ibgp update-source lo
+
+# Allow dynamic BGP peering within the 1.1.1.0/24 range
+bgp listen range 1.1.1.0/24 peer-group ibgp
+
+
+# Configure EVPN (Ethernet VPN) under BGP
+
+address-family l2vpn evpn
+
+# Activate iBGP neighbors for EVPN
+neighbor ibgp activate
+
+# Configure this router as a route reflector for iBGP clients
+neighbor ibgp route-reflector-client
+
+# Exit EVPN address-family configuration
+exit-address-family
+
+
+# Configure OSPF (Open Shortest Path First) for routing
+
+router ospf
+
+# Advertise all networks into OSPF (default route redistribution)
+network 0.0.0.0/0 area 0
+
+
+# Enable remote access to the router
+line vty
+

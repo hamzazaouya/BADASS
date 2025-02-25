@@ -1,0 +1,72 @@
+# Create and configure a Linux bridge
+
+# Add a bridge interface named br0
+ip link add br0 type bridge
+
+# Bring up the bridge interface
+ip link set dev br0 up
+
+# Create a VXLAN interface with ID 10 and destination port 4789
+ip link add vxlan10 type vxlan id 10 dstport 4789
+
+# Bring up the VXLAN interface
+ip link set dev vxlan10 up
+
+# Add the VXLAN interface to the bridge
+brctl addif br0 vxlan10
+
+# Add eth0 to the bridge (to allow Layer 2 bridging over VXLAN)
+brctl addif br0 eth0
+
+
+# Enter FRRouting (FRR) shell to configure routing
+vtysh
+
+# Enter configuration mode
+conf t
+
+# Set the hostname for the router
+hostname router_ael-hiou-3
+
+# Disable IPv6 forwarding
+no ipv6 forwarding
+
+
+# Configure network interfaces
+
+# eth1 interface (connected to another router)
+interface eth1
+ip address 10.1.1.6/30  # Assign IP to eth1
+ip ospf area 0  # Enable OSPF in area 0
+
+# Loopback interface (used for routing protocols like BGP and OSPF)
+interface lo
+ip address 1.1.1.3/32  # Assign a unique loopback IP
+ip ospf area 0  # Enable OSPF in area 0
+
+
+# Configure BGP (Border Gateway Protocol)
+
+router bgp 1  # Set the BGP Autonomous System (AS) number to 1
+
+# Define BGP neighbor (Router 1)
+neighbor 1.1.1.1 remote-as 1  # Neighbor in the same AS (iBGP)
+neighbor 1.1.1.1 update-source lo  # Use loopback as the update source
+
+
+# Configure EVPN (Ethernet VPN) under BGP
+address-family l2vpn evpn
+
+# Activate the BGP neighbor for EVPN
+neighbor 1.1.1.1 activate
+
+# Advertise all VXLAN VNIs (Virtual Network Identifiers)
+advertise-all-vni
+
+# Exit EVPN configuration mode
+exit-address-family
+
+
+# Configure OSPF (Open Shortest Path First) for dynamic routing
+router ospf
+

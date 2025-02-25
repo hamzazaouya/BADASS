@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Variables
-ROUTER_IMAGE_NAME="router_image"
+docker build -t ael-hiou-1_host-image -f _ael-hiou-1_host .
+docker build -t ael-hiou-2_router-image -f _ael-hiou-2 .
 
-docker build -t router_image ./router/
-docker build -t host_image ./host/
